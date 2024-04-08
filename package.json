@@ -1,0 +1,19 @@
+{
+  "name": "spoof-of-payment",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.9.5",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^3.3.2",
+    "nostr-tools": "^2.4.0",
+    "ws": "^8.16.0"
+  }
+}
