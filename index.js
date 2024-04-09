@@ -18,27 +18,30 @@ const preimage = crypto.randomBytes(32).toString('hex');
 const hash = crypto.createHash('sha256').update(preimage).digest().toString('hex');
 
 // Function to create an invoice with a pre-generated r_preimage and r_hash
-function createInvoice(eventJson) {
+async function createInvoice(eventJson) {
     // Convert to base64 as required by LND
     const r_preimage_base64 = Buffer.from(preimage, 'hex').toString('base64');
     const r_hash_base64 = Buffer.from(hash, 'hex').toString('base64');
 
     //   description hash is the sha256 hash of the stringified eventJson object in base64
-    const descriptionHash = crypto.createHash('sha256').update(Buffer.from(JSON.stringify(eventJson)).toString('base64')).digest().toString('base64');
+    const descriptionHash = crypto.createHash('sha256')
+        .update(Buffer.from(JSON.stringify(eventJson)).toString('base64'))
+        .digest()
+        .toString('base64');
 
     console.log('Preimage: ', r_preimage_base64);
     console.log('Hash: ', r_hash_base64);
 
     const postData = JSON.stringify({
         value: 2100,
-        r_preimage: r_preimage_base64, // Include preimage in base64
-        r_hash: r_hash_base64, // Include hash in base64
+        r_preimage: r_preimage_base64,
+        r_hash: r_hash_base64,
         description_hash: descriptionHash,
     });
 
     const options = {
         hostname: process.env.HOST,
-        port: 443, // Default HTTPS port
+        port: 443,
         path: '/v1/invoices',
         method: 'POST',
         headers: {
@@ -64,7 +67,6 @@ function createInvoice(eventJson) {
             reject(e);
         });
 
-        // Write data to request body
         req.write(postData);
         req.end();
     });
@@ -83,8 +85,7 @@ async function createZapRequest(senderPublicKey, recipientPublicKey, eventId, am
         created_at: Math.floor(Date.now() / 1000),
     };
 
-    const signedZapRequest = await finalizeEvent(zapRequest, process.env.PRIVKEY);
-    return signedZapRequest;
+    return await finalizeEvent(zapRequest, process.env.PRIVKEY);
 }
 
 async function createZapReceipt(invoice, zapRequest) {
@@ -102,33 +103,22 @@ async function createZapReceipt(invoice, zapRequest) {
         created_at: Math.floor(Date.now() / 1000),
     };
 
-    const signedZapReceipt = await finalizeEvent(zapReceipt, process.env.PRIVKEY);
-    return signedZapReceipt;
+    return await finalizeEvent(zapReceipt, process.env.PRIVKEY);
 }
 
 async function processZap(senderPublicKey, recipientPublicKey, eventId, amount, relays, content) {
     const zapRequest = await createZapRequest(senderPublicKey, recipientPublicKey, eventId, amount, relays, content);
-
     console.log("Zap request created:", zapRequest);
 
-    // Create the invoice using the existing createInvoice function
     const invoice = await createInvoice(zapRequest);
-
     console.log("Invoice created:", invoice);
 
-    // Create the zap receipt using the existing createZapReceipt function
     const zapReceipt = await createZapReceipt(invoice, zapRequest);
-
     console.log("Zap receipt created:", zapReceipt);
 
-    // Create a Relay instance and connect to the relay
     const relay = await Relay.connect(relays[0]);
-
-    // Publish the zap receipt to the relay
     await relay.publish(zapReceipt);
-
-    // Close the relay connection
     relay.close();
 }
 
-processZap(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", "eda5770aad7b57668a3e8ff69c5b054169becd1abcfb6dad44ee152ca185bd18", 210000000000, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
+processZap(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", "eda5770aad7b57668a3e8ff69c5b054169becd1abcfb6dad44ee152ca185bd18", 2100, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
