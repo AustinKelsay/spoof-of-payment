@@ -33,7 +33,7 @@ async function createInvoice(eventJson) {
     console.log('Hash: ', r_hash_base64);
 
     const postData = JSON.stringify({
-        value: 2100,
+        value: 2101,
         r_preimage: r_preimage_base64,
         r_hash: r_hash_base64,
         description_hash: descriptionHash,
@@ -72,13 +72,12 @@ async function createInvoice(eventJson) {
     });
 }
 
-async function createZapRequest(senderPublicKey, recipientPublicKey, eventId, amount, relays, content = "") {
+async function createZapRequest(senderPublicKey, recipientPublicKey, amount, relays, content = "") {
     const zapRequest = {
         kind: 9734,
         content,
         tags: [
             ["p", recipientPublicKey],
-            ["e", eventId],
             ["relays", ...relays],
             ["amount", amount.toString()],
         ],
@@ -94,7 +93,6 @@ async function createZapReceipt(invoice, zapRequest) {
         content: "",
         tags: [
             ["p", zapRequest.tags.find(t => t[0] === "p")[1]],
-            ["e", zapRequest.tags.find(t => t[0] === "e")[1]],
             ...(zapRequest.tags.find(t => t[0] === "a") ? [["a", zapRequest.tags.find(t => t[0] === "a")[1]]] : []),
             ["bolt11", invoice.payment_request],
             ["description", JSON.stringify(zapRequest)],
@@ -106,8 +104,8 @@ async function createZapReceipt(invoice, zapRequest) {
     return await finalizeEvent(zapReceipt, process.env.PRIVKEY);
 }
 
-async function processZap(senderPublicKey, recipientPublicKey, eventId, amount, relays, content) {
-    const zapRequest = await createZapRequest(senderPublicKey, recipientPublicKey, eventId, amount, relays, content);
+async function processZap(senderPublicKey, recipientPublicKey, amount, relays, content) {
+    const zapRequest = await createZapRequest(senderPublicKey, recipientPublicKey, amount, relays, content);
     console.log("Zap request created:", zapRequest);
 
     const invoice = await createInvoice(zapRequest);
@@ -121,4 +119,4 @@ async function processZap(senderPublicKey, recipientPublicKey, eventId, amount, 
     relay.close();
 }
 
-processZap(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", "eda5770aad7b57668a3e8ff69c5b054169becd1abcfb6dad44ee152ca185bd18", 2100, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
+processZap(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", 2101, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
