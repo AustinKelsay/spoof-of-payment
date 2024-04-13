@@ -104,7 +104,7 @@ async function createZapReceipt(invoice, zapRequest) {
     return await finalizeEvent(zapReceipt, process.env.PRIVKEY);
 }
 
-async function processZap(senderPublicKey, recipientPublicKey, amount, relays, content) {
+async function createSpoof(senderPublicKey, recipientPublicKey, amount, relays, content) {
     const zapRequest = await createZapRequest(senderPublicKey, recipientPublicKey, amount, relays, content);
     console.log("Zap request created:", zapRequest);
 
@@ -119,4 +119,4 @@ async function processZap(senderPublicKey, recipientPublicKey, amount, relays, c
     relay.close();
 }
 
-processZap(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", 2101, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
+createSpoof(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", 2101, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
