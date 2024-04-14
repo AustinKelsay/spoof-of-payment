@@ -8,16 +8,9 @@ useWebSocketImplementation(WebSocket);
 
 dotenv.config();
 
-// 1. Generate payment preimage/hash
-// 2. Create zap request
-// 3. Create invoice with preimage/hash and zap request as the description 
-// 4. Create zap receipt
-// 5. Publish zap request then zap receipt to relay
-
 const preimage = crypto.randomBytes(32).toString('hex');
 const hash = crypto.createHash('sha256').update(preimage).digest().toString('hex');
 
-// Function to create an invoice with a pre-generated r_preimage and r_hash
 async function createInvoice(eventJson) {
     // Convert to base64 as required by LND
     const r_preimage_base64 = Buffer.from(preimage, 'hex').toString('base64');
@@ -33,7 +26,7 @@ async function createInvoice(eventJson) {
     console.log('Hash: ', r_hash_base64);
 
     const postData = JSON.stringify({
-        value: 2101,
+        value: 69420,
         r_preimage: r_preimage_base64,
         r_hash: r_hash_base64,
         description_hash: descriptionHash,
@@ -119,4 +112,4 @@ async function createSpoof(senderPublicKey, recipientPublicKey, amount, relays, 
     relay.close();
 }
 
-createSpoof(process.env.PUBKEY, "8172b9205247ddfe99b783320782d0312fa305a199fb2be8a3e6563e20b4f0e2", 2101, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
+createSpoof(process.env.PUBKEY, "f33c8a9617cb15f705fc70cd461cfd6eaf22f9e24c33eabad981648e5ec6f741", 69420, ["wss://nostr.mutinywallet.com", "wss://relay.mutinywallet.com"], "⚡");
